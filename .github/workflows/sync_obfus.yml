@@ -15,9 +15,9 @@ jobs:
     if: ${{ github.event.repository.fork }}
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: .
+      # Step 1: run a standard checkout action
+      - name: Checkout target repo
+        uses: actions/checkout@v3
 
       # Step 2: run the sync action
       - name: Sync upstream changes
@@ -32,34 +32,9 @@ jobs:
           # Set test_mode true to run tests instead of the true action!!
           test_mode: false
 
-       - name: Install dependencies
-        run: npm install -g javascript-obfuscator
-
-      - name: Obfuscate code
+      - name: Sync check
+        if: failure()
         run: |
-          javascript-obfuscator ./src/worker.js --output 明文源码.js \
-          --compact true \
-          --control-flow-flattening true \
-          --control-flow-flattening-threshold 1 \
-          --dead-code-injection true \
-          --dead-code-injection-threshold 1 \
-          --identifier-names-generator hexadecimal \
-          --rename-globals true \
-          --string-array true \
-          --string-array-encoding 'rc4' \
-          --string-array-threshold 1 \
-          --transform-object-keys true \
-          --unicode-escape-sequence true
-
-      - name: Commit changes
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add _worker.js
-          git commit -m "Obfuscate _worker.js" || echo "No changes to commit"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次，详细教程请查看项目README.md "
+          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork. Please refer to the project README.md for instructions. "
+          exit 1
