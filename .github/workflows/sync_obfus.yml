@@ -16,8 +16,8 @@ jobs:
 
     steps:
       # Step 1: run a standard checkout action
-      - name: Checkout target repo
-        uses: actions/checkout@v3
+      #- name: Checkout target repo
+       # uses: actions/checkout@v3
 
       # Step 2: run the sync action
       - name: Sync upstream changes
