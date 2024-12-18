@@ -37,7 +37,7 @@ jobs:
 
       - name: Obfuscate code
         run: |
-          javascript-obfuscator ./src/worker.js --output 文源码.js \
+          javascript-obfuscator ./src/worker.js --output 明文源码.js \
           --compact true \
           --control-flow-flattening true \
           --control-flow-flattening-threshold 1 \
