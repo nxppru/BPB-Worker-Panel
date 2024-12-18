@@ -1,43 +1,33 @@
-name: Upstream Sync
-
-permissions:
-  contents: write
+name: Obfuscate and Commit
 
 on:
-  schedule:
-    - cron: "0 0 * * *" # every day
-  workflow_dispatch:
+    push:
+        paths:
+            - '/main/src/worker.js'
+    workflow_dispatch:
 
 jobs:
-  sync_latest_from_upstream:
-    name: Sync latest commits from upstream repo
+  obfuscate:
     runs-on: ubuntu-latest
-    if: ${{ github.event.repository.fork }}
+    permissions:
+      contents: write
 
     steps:
-      # Step 1: run a standard checkout action
-      - name: Checkout target repo
-        uses: actions/checkout@v3
-
-      # Step 2: run the sync action
-      - name: Sync upstream changes
-        id: sync
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      - uses: actions/checkout@v3
         with:
-          upstream_sync_repo: bia-pain-bache/BPB-Worker-Panel
-          upstream_sync_branch: main
-          target_sync_branch: rename
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }} # automatically generated, no need to set
+          fetch-depth: 0
 
-          # Set test_mode true to run tests instead of the true action!!
-          test_mode: false
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
 
-       - name: Install dependencies
+      - name: Install dependencies
         run: npm install -g javascript-obfuscator
 
       - name: Obfuscate code
         run: |
-          javascript-obfuscator ./src/worker.js --output _worker.js \
+          javascript-obfuscator /src/worker.js --output _worker.js \
           --compact true \
           --control-flow-flattening true \
           --control-flow-flattening-threshold 1 \
